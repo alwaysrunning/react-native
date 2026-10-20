@@ -9,7 +9,9 @@ import {
   Alert,
   Image,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
+import * as Updates from 'expo-updates';
 import * as ImagePicker from 'expo-image-picker';
 import * as Notifications from 'expo-notifications';
 import { Colors, Spacing } from '../constants/theme';
@@ -28,6 +30,44 @@ export default function MineScreen() {
   const [darkMode, setDarkMode] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  // 检查更新
+  const checkUpdate = async () => {
+    setIsChecking(true);
+    try {
+      // 1. 请求服务器，看是否有可用更新
+      const updateResult = await Updates.checkForUpdateAsync();
+      if (updateResult.isAvailable) {
+        Alert.alert('发现新版本', '是否立即下载更新？', [
+          { text: '稍后', style: 'cancel' },
+          {
+            text: '更新',
+            onPress: async () => {
+              setIsDownloading(true);
+              try {
+                // 2. 下载JS包和资源
+                await Updates.fetchUpdateAsync();
+                Alert.alert('下载完成，即将重启App');
+                // 3. 立刻重启App加载新版本
+                await Updates.reloadAsync();
+              } catch (err) {
+                Alert.alert('更新失败', String(err));
+                setIsDownloading(false);
+              }
+            },
+          },
+        ]);
+      } else {
+        Alert.alert('当前已经是最新版本');
+      }
+    } catch (e) {
+      Alert.alert('检查更新出错', String(e));
+    } finally {
+      setIsChecking(false);
+    }
+  };
 
   // 申请相册权限 + 通知权限
   useEffect(() => {
@@ -81,11 +121,12 @@ export default function MineScreen() {
       },
     });
   }, []);
+  
 
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.name}>张三</Text>
+        <Text style={styles.name}>李四</Text>
         <Text style={styles.info}>前端开发工程师</Text>
       </View>
 
@@ -108,6 +149,14 @@ export default function MineScreen() {
 
       <Pressable style={styles.btn} onPress={() => setModalVisible(true)}>
         <Text style={styles.btnText}>打开弹窗</Text>
+      </Pressable>
+
+      <Pressable style={styles.updateBtn} onPress={checkUpdate} disabled={isChecking || isDownloading}>
+        {isChecking ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.btnText}>检查版本更新（OTA热更）</Text>
+        )}
       </Pressable>
 
       <Modal
@@ -217,5 +266,12 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 6,
     alignItems: 'center',
+  },
+  updateBtn: {
+    backgroundColor: '#0091ff',
+    padding:14,
+    borderRadius:8,
+    alignItems:'center',
+    marginTop:Spacing.md,
   },
 });

@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { registerGlobalError } from './utils/errorHandler';
 import { Colors } from './constants/theme';
-
+import * as Updates from 'expo-updates';
 import HomeScreen from './screens/HomeScreen';
 import DetailScreen from './screens/DetailScreen';
 import MineScreen from './screens/MineScreen';
@@ -26,6 +26,19 @@ function HomeStack() {
 export default function App() {
   useEffect(() => {
     registerGlobalError();
+    async function autoCheck() {
+      try {
+        const res = await Updates.checkForUpdateAsync();
+        console.log('自动更新检查结果：', res);
+        if (res.isAvailable) {
+          // 后台静默下载，下次用户关掉重开App自动生效
+          await Updates.fetchUpdateAsync();
+        }
+      } catch (e) {
+        console.log('自动更新检查失败：', e);
+      }
+    }
+    autoCheck();
   }, []);
 
   return (
