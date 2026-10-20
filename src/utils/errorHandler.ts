@@ -1,12 +1,7 @@
 import { Alert } from 'react-native';
 
-interface ErrorUtils {
+interface ErrorUtilsLike {
   setGlobalHandler: (handler: (error: Error, isFatal: boolean) => void) => void;
-}
-
-declare global {
-  // eslint-disable-next-line no-var
-  var ErrorUtils: ErrorUtils | undefined;
 }
 
 const errorHandler = (error: Error, isFatal: boolean): void => {
@@ -18,5 +13,7 @@ const errorHandler = (error: Error, isFatal: boolean): void => {
 };
 
 export const registerGlobalError = (): void => {
-  global.ErrorUtils?.setGlobalHandler(errorHandler);
+  const errorUtils = (globalThis as unknown as { ErrorUtils?: ErrorUtilsLike })
+    .ErrorUtils;
+  errorUtils?.setGlobalHandler(errorHandler);
 };
