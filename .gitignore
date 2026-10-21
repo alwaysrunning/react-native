@@ -1,4 +1,48 @@
+# 依赖与构建产物
 node_modules
 dist
+.android/
+.expo/
+.expo-shared/
+
+# 原生工程（用 prebuild 或 expo run 时生成，版本无关的生成物）
 android
 ios
+web-build
+web-artifacts
+native-artifacts
+
+# macOS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.sublime-workspace
+
+# EAS / Expo 本地凭据（签名密钥 / Keystore / Provisioning / credentials.json 等）
+# ⚠️ 绝对禁止上传 GitHub！改用 `eas credentials` 托管到 EAS 云端。
+credentials.json
+credentials/
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+*.mobileprovision
+*.mobileprovision-oldpkg
+*.cer
+*.certSigningRequest
+
+# 环境变量与密钥
+.env
+.env.*
+!.env.example
+
+# Google / Apple 官方配置（含 Bundle ID 但不含私钥的可按需保留）
+google-services.json
+GoogleService-Info.plist
+
+# 日志
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
